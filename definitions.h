@@ -8,3 +8,4 @@
 #define NEOPIXEL_TYPE WS2812
 
 // Various Constants
+#define IMPACT_THRESHOLD 350
