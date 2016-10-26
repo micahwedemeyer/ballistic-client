@@ -8,6 +8,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEOPIX
 int impact_sensor_reading;
 bool hit_detected;
 bool processing_hit;
+MusicPlayer *player;
 
 void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -17,8 +18,8 @@ void setup() {
   processing_hit = false;
   hit_detected = false;
   Particle.publish("Setup Complete");
-  //toneTest();
 
+  player = new MusicPlayer();
 }
 
 bool is_hit(int impact_reading) {
@@ -53,7 +54,8 @@ void play_hit_tone() {
 }
 
 void loop() {
-  pixelTest(&strip);
+  //pixelTest(&strip);
+  player->playTune();
   /*check_hit_sensor();
   if(hit_detected) {
     register_hit();
