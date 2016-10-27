@@ -1,7 +1,9 @@
 class MusicPlayer {
 public:
   MusicPlayer();
+  bool playInProgress();
   void playTune();
+  void tick();
 
 private:
   Timer *timer;

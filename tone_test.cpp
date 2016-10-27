@@ -9,26 +9,32 @@ MusicPlayer::MusicPlayer() {
   noteCount = 8;
 }
 
+bool MusicPlayer::playInProgress() {
+  return tuneInProgress;
+}
+
 void MusicPlayer::playTune() {
   if(noteInProgress) {
     return;
   }
 
   if(!tuneInProgress) {
-    Particle.publish("Tone Test Play Start");
     tuneInProgress = true;
-    noteIndex = 0;
-    this->playNote(noteIndex);
+    noteIndex = -1;
+    this->tick();
+  }
+}
+
+void MusicPlayer::tick() {
+  if(noteInProgress || !tuneInProgress) {
     return;
   }
 
-  if(!noteInProgress) {
-    noteIndex++;
-    if(noteIndex < noteCount) {
-      this->playNote(noteIndex);
-    } else {
-      this->endPlay();
-    }
+  noteIndex++;
+  if(noteIndex < noteCount) {
+    this->playNote(noteIndex);
+  } else {
+    this->endPlay();
   }
 }
 
@@ -38,13 +44,13 @@ void MusicPlayer::endNote() {
 
 void MusicPlayer::playNote(int thisNote) {
   // notes in the melody:
-  int melody[] = {1908,2551,2551,2273,2551,0,2024,1908}; //C4,G3,G3,A3,G3,0,B3,C4
+  //int melody[] = {1908,2551,2551,2273,2551,0,2024,1908}; //C4,G3,G3,A3,G3,0,B3,C4
+  int melody[] = {1908,2551,2551,2273,2551}; //C4,G3,G3,A3,G3,0,B3,C4
   // note durations: 4 = quarter note, 8 = eighth note, etc.:
   int noteDurations[] = {4,8,8,4,4,4,4,4 };
-  int noteCount = 8;
+  int noteCount = 5;
 
   noteInProgress = true;
-  Particle.publish("Note Play", String(thisNote));
 
   // stop the tone playing:
   noTone(SPEAKER_PIN);
@@ -71,5 +77,4 @@ void MusicPlayer::endPlay() {
   timer->dispose();
   noteInProgress = false;
   tuneInProgress = false;
-  Particle.publish("Tone Test Play End");
 }
