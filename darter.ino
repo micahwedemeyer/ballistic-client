@@ -7,6 +7,7 @@ int impactSensorReading;
 volatile bool hitDetected;
 bool processingHit;
 MusicPlayer *player;
+LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 Timer *hitDelayer;
 
@@ -17,14 +18,16 @@ void setup() {
   pinMode(IMPACT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
 
-  strip = new Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEOPIXEL_TYPE);
-
   impactSensorReading = 0;
   processingHit = false;
   hitDetected = false;
   Particle.publish("Setup Complete");
 
   player = new MusicPlayer();
+
+  strip = new Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEOPIXEL_TYPE);
+  lightshowController = new LightshowController(strip);
+  lightshowController->blank();
 
   digitalWrite(LED_PIN, LOW);
 
@@ -50,7 +53,10 @@ bool isHitProcessing() {
 void endHit() {
   hitDetected = false;
   processingHit = false;
+
   digitalWrite(LED_PIN, LOW);
+  lightshowController->blank();
+
   hitDelayer->reset();
   hitDelayer->stop();
 }
@@ -61,23 +67,27 @@ void registerHit() {
   }
 
   processingHit = true;
-  Particle.publish("Hit", String(impactSensorReading));
-  playHitTune();
+
+  player->playTune();
+  lightshowController->playShow();
+
   digitalWrite(LED_PIN, HIGH);
 
   hitDelayer->start();
+
+  Particle.publish("Hit", String(impactSensorReading));
 }
 
-void playHitTune() {
-  player->playTune();
+void ticks() {
+  player->tick();
+  lightshowController->tick();
 }
 
 void loop() {
-  //pixelTest(strip);
-
   checkHitSensor();
   if(hitDetected && !isHitProcessing()) {
     registerHit();
   }
-  player->tick();
+
+  ticks();
 }
