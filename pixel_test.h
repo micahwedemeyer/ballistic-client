@@ -7,6 +7,7 @@ public:
   void tick();
   void blank();
   void setLights();
+  void setAll(uint32_t color);
   void advanceShow();
 
 private:

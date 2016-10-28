@@ -22,21 +22,21 @@ void LightshowController::tick() {
   if(!showPlaying || isWaiting) {
     return;
   }
-  this->setLights();
-  strip->show();
-  timer->reset();
-  isWaiting = true;
+
+  if(currentPos <= 64) {
+    this->setLights();
+    strip->show();
+    timer->reset();
+    isWaiting = true;
+  } else {
+    endShow();
+  }
 }
 
 void LightshowController::advanceShow() {
   timer->stop();
   isWaiting = false;
-
   currentPos++;
-  if(currentPos > 64) {
-    //currentPos = 0;
-    endShow();
-  }
 }
 
 void LightshowController::endShow() {
@@ -50,11 +50,14 @@ void LightshowController::setLights() {
   }
 }
 
-void LightshowController::blank() {
-  int i;
-  for(i = 0; i < strip->numPixels(); i++) {
-    strip->setPixelColor(i, strip->Color(0,0,0));
+void LightshowController::setAll(uint32_t color) {
+  for(int i = 0; i < strip->numPixels(); i++) {
+    strip->setPixelColor(i, color);
   }
+}
+
+void LightshowController::blank() {
+  setAll(strip->Color(0,0,0));
   strip->show();
 }
 

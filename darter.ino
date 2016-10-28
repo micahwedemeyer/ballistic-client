@@ -26,6 +26,9 @@ void setup() {
   player = new MusicPlayer();
 
   strip = new Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEOPIXEL_TYPE);
+  strip->begin();
+  strip->setBrightness(NEOPIXEL_BRIGHTNESS);
+
   lightshowController = new LightshowController(strip);
   lightshowController->blank();
 

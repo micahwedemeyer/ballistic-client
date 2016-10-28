@@ -7,6 +7,7 @@
 // LED Strip
 #define NEOPIXEL_COUNT 60
 #define NEOPIXEL_TYPE WS2812
+#define NEOPIXEL_BRIGHTNESS 128
 
 // Various Constants
 #define IMPACT_THRESHOLD 700
