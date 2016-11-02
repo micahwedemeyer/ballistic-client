@@ -13,9 +13,14 @@ LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
 }
 
 void LightshowController::playShow() {
+  // showPlaying = true;
+  // currentPos = 0;
+  // this->tick();
+
+  uint32_t c = strip->Color(255,0,255);
+  setAll(c);
+  strip->show();
   showPlaying = true;
-  currentPos = 0;
-  this->tick();
 }
 
 void LightshowController::tick() {

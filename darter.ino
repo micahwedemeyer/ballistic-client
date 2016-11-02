@@ -71,14 +71,13 @@ void registerHit() {
 
   processingHit = true;
 
-  player->playTune();
   lightshowController->playShow();
-
   digitalWrite(LED_PIN, HIGH);
 
   hitDelayer->start();
 
   Particle.publish("Hit", String(impactSensorReading));
+  player->playTune();
 }
 
 void ticks() {
