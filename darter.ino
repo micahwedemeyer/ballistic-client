@@ -30,7 +30,7 @@ void setup() {
   strip->setBrightness(NEOPIXEL_BRIGHTNESS);
 
   lightshowController = new LightshowController(strip);
-  lightshowController->blank();
+  lightshowController->playIdleShow();
 
   digitalWrite(LED_PIN, LOW);
 
@@ -58,7 +58,7 @@ void endHit() {
   processingHit = false;
 
   digitalWrite(LED_PIN, LOW);
-  lightshowController->blank();
+  lightshowController->playIdleShow();
 
   hitDelayer->reset();
   hitDelayer->stop();
@@ -71,7 +71,7 @@ void registerHit() {
 
   processingHit = true;
 
-  lightshowController->playShow();
+  lightshowController->playHitShow();
   digitalWrite(LED_PIN, HIGH);
 
   hitDelayer->start();

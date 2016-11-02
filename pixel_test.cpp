@@ -9,43 +9,40 @@ LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
   timer = new Timer(20, &LightshowController::advanceShow, *this);
   currentPos = 0;
   isWaiting = false;
-  showPlaying = false;
+  hitShowPlaying = false;
+  idleShowPlaying = false;
 }
 
-void LightshowController::playShow() {
-  // showPlaying = true;
-  // currentPos = 0;
-  // this->tick();
+void LightshowController::playIdleShow() {
+  hitShowPlaying = false;
+  idleShowPlaying = true;
+  currentPos = 0;
+  this->tick();
+}
 
+void LightshowController::playHitShow() {
   uint32_t c = strip->Color(255,0,255);
   setAll(c);
   strip->show();
-  showPlaying = true;
+  hitShowPlaying = true;
+  idleShowPlaying = false;
 }
 
 void LightshowController::tick() {
-  if(!showPlaying || isWaiting) {
+  if(!idleShowPlaying || isWaiting) {
     return;
   }
 
-  if(currentPos <= 64) {
-    this->setLights();
-    strip->show();
-    timer->reset();
-    isWaiting = true;
-  } else {
-    endShow();
-  }
+  this->setLights();
+  strip->show();
+  timer->reset();
+  isWaiting = true;
 }
 
 void LightshowController::advanceShow() {
   timer->stop();
   isWaiting = false;
-  currentPos++;
-}
-
-void LightshowController::endShow() {
-  showPlaying = false;
+  currentPos = (currentPos + 1) % 255;
 }
 
 void LightshowController::setLights() {

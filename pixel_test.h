@@ -3,7 +3,8 @@
 class LightshowController {
 public:
   LightshowController(Adafruit_NeoPixel *strip);
-  void playShow();
+  void playHitShow();
+  void playIdleShow();
   void tick();
   void blank();
   void setLights();
@@ -14,7 +15,8 @@ private:
   uint32_t wheel(byte wheelPos);
   void endShow();
 
-  bool showPlaying;
+  bool hitShowPlaying;
+  bool idleShowPlaying;
   bool isWaiting;
   int currentPos;
   Timer *timer;
