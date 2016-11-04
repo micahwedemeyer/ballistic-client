@@ -2,6 +2,7 @@
 #include "neopixel.h";
 #include "tone_test.h";
 #include "pixel_test.h";
+#include "MQTT.h";
 
 int impactSensorReading;
 volatile bool hitDetected;
@@ -10,8 +11,12 @@ MusicPlayer *player;
 LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 Timer *hitDelayer;
+MQTT *mqttClient;
 
 void endHit();
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+
+}
 
 void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -21,7 +26,6 @@ void setup() {
   impactSensorReading = 0;
   processingHit = false;
   hitDetected = false;
-  Particle.publish("Setup Complete");
 
   player = new MusicPlayer();
 
@@ -35,6 +39,12 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   hitDelayer = new Timer(HIT_DELAY_MS, endHit, true);
+
+  byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
+  mqttClient = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
+  mqttClient->connect("darter-" + System.deviceID());
+
+  Particle.publish("Setup Complete");
 }
 
 bool isHit(int impactReading) {
@@ -78,6 +88,10 @@ void registerHit() {
 
   Particle.publish("Hit", String(impactSensorReading));
   player->playTune();
+
+  if(mqttClient->isConnected()) {
+    mqttClient->publish(MQTT_HITS_TOPIC, "hit");
+  }
 }
 
 void ticks() {
@@ -92,4 +106,8 @@ void loop() {
   }
 
   ticks();
+
+  if(mqttClient->isConnected()) {
+    mqttClient->loop();
+  }
 }
