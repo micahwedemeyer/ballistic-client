@@ -10,10 +10,11 @@
 #define NEOPIXEL_BRIGHTNESS 128
 
 // MQTT Broker
+// Currently we run Mosquitto MQTT broker on the Kegalytics R-Pi3
 #define MQTT_BROKER_HOST_B1 192
 #define MQTT_BROKER_HOST_B2 168
-#define MQTT_BROKER_HOST_B3 11
-#define MQTT_BROKER_HOST_B4 99
+#define MQTT_BROKER_HOST_B3 10
+#define MQTT_BROKER_HOST_B4 105
 #define MQTT_BROKER_PORT 1883
 #define MQTT_HITS_TOPIC "hits"
 
