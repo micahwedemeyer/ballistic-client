@@ -79,7 +79,6 @@ void registerHit() {
   if(isHitProcessing()) {
     return;
   }
-
   processingHit = true;
 
   lightshowController->playHitShow();
@@ -91,10 +90,22 @@ void registerHit() {
   player->playTune();
 
   if(mqttClient->isConnected()) {
-    mqttClient->publish(MQTT_HITS_TOPIC, "hit");
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& root = jsonBuffer.createObject();
+
+    char deviceId[32];
+    System.deviceID().toCharArray(deviceId, 32);
+    root["deviceId"] = deviceId;
+    root["timestamp"] = Time.now();
+
+    char jsonString[255];
+    root.printTo(jsonString, 255);
+
+    Particle.publish(jsonString);
+
+    mqttClient->publish(MQTT_HITS_TOPIC, jsonString);
   }
 }
-
 void ticks() {
   player->tick();
   lightshowController->tick();
