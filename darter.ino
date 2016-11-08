@@ -3,6 +3,7 @@
 #include "tone_test.h";
 #include "pixel_test.h";
 #include "MQTT.h";
+#include "ArduinoJson.h";
 
 int impactSensorReading;
 volatile bool hitDetected;
