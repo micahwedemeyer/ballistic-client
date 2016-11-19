@@ -2,6 +2,7 @@
 #include "neopixel.h";
 #include "tone_test.h";
 #include "pixel_test.h";
+#include "MQTTClient.h";
 #include "MQTT.h";
 #include "ArduinoJson.h";
 
@@ -12,12 +13,11 @@ MusicPlayer *player;
 LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 Timer *hitDelayer;
-MQTT *mqttClient;
+MQTT *mqttConnection;
+MQTTClient *mqttClient;
 
 void endHit();
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-
-}
+void mqttCallback(char* topic, byte* payload, unsigned int length);
 
 void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -41,9 +41,13 @@ void setup() {
 
   hitDelayer = new Timer(HIT_DELAY_MS, endHit, true);
 
+
   byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
-  mqttClient = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
-  mqttClient->connect("darter-" + System.deviceID());
+  mqttConnection = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
+  mqttConnection->connect("darter-" + System.deviceID());
+  mqttClient = new MQTTClient(mqttConnection, System.deviceID());
+  mqttClient->subscribeToTopics();
+  mqttClient->publishIntroduction();
 
   Particle.publish("Setup Complete");
 }
@@ -79,36 +83,24 @@ void registerHit() {
   if(isHitProcessing()) {
     return;
   }
+  hitShow();
+  mqttClient->publishHit();
+}
+
+void hitShow() {
   processingHit = true;
+  hitDelayer->start();
 
   lightshowController->playHitShow();
   digitalWrite(LED_PIN, HIGH);
 
-  hitDelayer->start();
-
-  Particle.publish("Hit", String(impactSensorReading));
   player->playTune();
-
-  if(mqttClient->isConnected()) {
-    StaticJsonBuffer<200> jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
-
-    char deviceId[32];
-    System.deviceID().toCharArray(deviceId, 32);
-    root["deviceId"] = deviceId;
-    root["timestamp"] = Time.now();
-
-    char jsonString[255];
-    root.printTo(jsonString, 255);
-
-    Particle.publish(jsonString);
-
-    mqttClient->publish(MQTT_HITS_TOPIC, jsonString);
-  }
 }
+
 void ticks() {
   player->tick();
   lightshowController->tick();
+  mqttClient->tick();
 }
 
 void loop() {
@@ -118,8 +110,21 @@ void loop() {
   }
 
   ticks();
+}
 
-  if(mqttClient->isConnected()) {
-    mqttClient->loop();
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  char p[length + 1];
+  memcpy(p, payload, length);
+  p[length] = NULL;
+  String message(p);
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(p);
+
+  Particle.publish("MQTT message received: " + String(topic));
+
+  String topicStr(topic);
+  if(topicStr.endsWith("playShow")) {
+
   }
 }
