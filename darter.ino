@@ -1,7 +1,7 @@
 #include "definitions.h";
 #include "neopixel.h";
-#include "tone_test.h";
-#include "pixel_test.h";
+#include "MusicPlayer.h";
+#include "LightshowController.h";
 #include "ImpactSensor.h";
 #include "MQTTClient.h";
 #include "MQTT.h";

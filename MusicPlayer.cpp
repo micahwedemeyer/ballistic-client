@@ -1,6 +1,6 @@
 #include "Particle.h";
 #include "definitions.h";
-#include "tone_test.h";
+#include "MusicPlayer.h";
 
 MusicPlayer::MusicPlayer() {
   timer = new Timer(0, &MusicPlayer::endNote, *this);

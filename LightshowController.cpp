@@ -1,7 +1,7 @@
 #include "Particle.h";
 #include "neopixel.h";
 #include "definitions.h";
-#include "pixel_test.h";
+#include "LightshowController.h";
 
 LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
   this->strip = strip;
