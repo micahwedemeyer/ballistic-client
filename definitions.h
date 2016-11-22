@@ -20,4 +20,4 @@
 
 // Various Constants
 #define IMPACT_THRESHOLD 700
-#define HIT_DELAY_MS 5
+#define HIT_DELAY_MS 300
