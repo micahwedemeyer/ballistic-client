@@ -20,10 +20,20 @@ void LightshowController::playIdleShow() {
   this->tick();
 }
 
-void LightshowController::playHitShow() {
+void LightshowController::playHitShow(std::function<void()> callback) {
+  if(hitShowPlaying) {
+    return;
+  }
+
+  hitShowCallback = callback;
+
   uint32_t c = strip->Color(255,0,255);
   setAll(c);
   strip->show();
+
+  showTimer = new Timer(1500, &LightshowController::endHitShow, *this);
+  showTimer->start();
+
   hitShowPlaying = true;
   idleShowPlaying = false;
 }
@@ -43,6 +53,12 @@ void LightshowController::advanceShow() {
   timer->stop();
   isWaiting = false;
   currentPos = (currentPos + 1) % 255;
+}
+
+void LightshowController::endHitShow() {
+  showTimer->stop();
+  showTimer->dispose();
+  hitShowCallback();
 }
 
 void LightshowController::setLights() {

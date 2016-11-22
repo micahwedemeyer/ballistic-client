@@ -9,6 +9,7 @@
 int impactSensorReading;
 volatile bool hitDetected;
 bool processingHit;
+bool showPlaying;
 MusicPlayer *player;
 LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
@@ -27,6 +28,7 @@ void setup() {
   impactSensorReading = 0;
   processingHit = false;
   hitDetected = false;
+  showPlaying = false;
 
   player = new MusicPlayer();
 
@@ -71,9 +73,7 @@ bool isHitProcessing() {
 void endHit() {
   hitDetected = false;
   processingHit = false;
-
   digitalWrite(LED_PIN, LOW);
-  lightshowController->playIdleShow();
 
   hitDelayer->reset();
   hitDelayer->stop();
@@ -83,17 +83,25 @@ void registerHit() {
   if(isHitProcessing()) {
     return;
   }
-  hitShow();
+
+  digitalWrite(LED_PIN, HIGH);
+
+  processingHit = true;
+  hitDelayer->start();
   mqttClient->publishHit();
 }
 
-void hitShow() {
-  processingHit = true;
-  hitDelayer->start();
+void endShow() {
+  showPlaying = false;
+  lightshowController->playIdleShow();
+}
 
-  lightshowController->playHitShow();
-  digitalWrite(LED_PIN, HIGH);
-
+void playShow(String showId) {
+  if(showPlaying) {
+    return;
+  }
+  showPlaying = true;
+  lightshowController->playHitShow(&endShow);
   player->playTune();
 }
 
@@ -125,6 +133,6 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   String topicStr(topic);
   if(topicStr.endsWith("playShow")) {
-
+    playShow("win");
   }
 }
