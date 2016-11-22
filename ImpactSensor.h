@@ -2,7 +2,7 @@
 
 class ImpactSensor {
 public:
-  ImpactSensor(int sensorPin, int ledPin, int thold, int hitDelayMs, std::function<void()> callback);
+  ImpactSensor(int sensorPin, int ledPin, int thold, int hitDelayMs, std::function<void(int)> callback);
   bool isHitProcessing();
   void tick();
 
@@ -12,10 +12,10 @@ private:
   int impactThreshold;
   bool hitProcessing;
   Timer *hitDelayer;
-  std::function<void()> callback;
+  std::function<void(int)> callback;
 
   void checkHitSensor();
   bool isHit(int impactReading);
-  void processHit();
+  void processHit(int sensorReading);
   void endProcessHit();
 };

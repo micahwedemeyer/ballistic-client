@@ -17,7 +17,7 @@ MQTTClient *mqttClient;
 
 void endHit();
 void mqttCallback(char* topic, byte* payload, unsigned int length);
-void hitDetected();
+void hitDetected(int reading);
 
 void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -61,7 +61,8 @@ void loop() {
 }
 
 // Callback for the ImpactSensor
-void hitDetected() {
+void hitDetected(int reading) {
+  Particle.publish("Hit: " + String(reading));
   mqttClient->publishHit();
 }
 

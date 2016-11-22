@@ -1,6 +1,6 @@
 #include "ImpactSensor.h";
 
-ImpactSensor::ImpactSensor(int pin, int lpin, int thold, int hitDelayMs, std::function<void()> cb) {
+ImpactSensor::ImpactSensor(int pin, int lpin, int thold, int hitDelayMs, std::function<void(int)> cb) {
   sensorPin = pin;
   ledPin = lpin;
   impactThreshold = thold;
@@ -24,7 +24,7 @@ bool ImpactSensor::isHitProcessing() {
 void ImpactSensor::checkHitSensor() {
   int impactSensorReading = analogRead(sensorPin);
   if(isHit(impactSensorReading)) {
-    processHit();
+    processHit(impactSensorReading);
   }
 }
 
@@ -32,11 +32,11 @@ bool ImpactSensor::isHit(int impactReading) {
   return impactReading >= impactThreshold;
 }
 
-void ImpactSensor::processHit() {
+void ImpactSensor::processHit(int sensorReading) {
   hitProcessing = true;
   hitDelayer->reset();
   digitalWrite(ledPin, HIGH);
-  callback();
+  callback(sensorReading);
 }
 
 void ImpactSensor::endProcessHit() {
