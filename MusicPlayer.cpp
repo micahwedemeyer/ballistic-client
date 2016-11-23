@@ -3,19 +3,22 @@
 #include "MusicPlayer.h";
 
 MusicPlayer::MusicPlayer() {
-  timer = new Timer(0, &MusicPlayer::endNote, *this);
+  timer = new Timer(1000, &MusicPlayer::endNote, *this);
   noteInProgress = false;
   tuneInProgress = false;
-  noteCount = 8;
 }
 
 bool MusicPlayer::playInProgress() {
   return tuneInProgress;
 }
 
-void MusicPlayer::playTune() {
+void MusicPlayer::playTune(String tuneId) {
   if(noteInProgress) {
     return;
+  }
+
+  if(tuneId == "win") {
+    melodyIndex = 0;
   }
 
   if(!tuneInProgress) {
@@ -31,8 +34,10 @@ void MusicPlayer::tick() {
   }
 
   noteIndex++;
-  if(noteIndex < noteCount) {
-    this->playNote(noteIndex);
+  if(noteIndex < noteCounts[melodyIndex]) {
+    int note = notes[melodyIndex][noteIndex];
+    int duration = noteDurations[melodyIndex][noteIndex];
+    this->playNote(note, duration);
   } else {
     this->endPlay();
   }
@@ -42,39 +47,21 @@ void MusicPlayer::endNote() {
   noteInProgress = false;
 }
 
-void MusicPlayer::playNote(int thisNote) {
-  // notes in the melody:
-  //int melody[] = {1908,2551,2551,2273,2551,0,2024,1908}; //C4,G3,G3,A3,G3,0,B3,C4
-  int melody[] = {1908,2551,2551,2273,2551}; //C4,G3,G3,A3,G3,0,B3,C4
-  // note durations: 4 = quarter note, 8 = eighth note, etc.:
-  int noteDurations[] = {4,8,8,4,4,4,4,4 };
-  int noteCount = 5;
-
+void MusicPlayer::playNote(int note, int duration) {
+  tone(SPEAKER_PIN, note, duration);
   noteInProgress = true;
-
-  // stop the tone playing:
-  noTone(SPEAKER_PIN);
-
-  // to calculate the note duration, take one second
-  // divided by the note type.
-  //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-
-  int noteDuration = 1000/noteDurations[thisNote];
-  tone(SPEAKER_PIN, melody[thisNote],noteDuration);
 
   // to distinguish the notes, set a minimum time between them.
   // the note's duration + 30% seems to work well:
-  int pauseBetweenNotes = noteDuration * 1.30;
+  int pauseBetweenNotes = duration * 1.30;
 
-  timer->dispose();
-  timer = new Timer(pauseBetweenNotes, &MusicPlayer::endNote, *this);
-  timer->start();
+  timer->changePeriod(pauseBetweenNotes);
+  timer->reset();
 }
 
 void MusicPlayer::endPlay() {
-  noTone(SPEAKER_PIN);
   timer->stop();
-  timer->dispose();
+  noTone(SPEAKER_PIN);
   noteInProgress = false;
   tuneInProgress = false;
 }

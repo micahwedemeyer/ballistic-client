@@ -81,7 +81,7 @@ void playShow(String showId) {
 
   showPlaying = true;
   lightshowController->playShow(showId, &endShow);
-  player->playTune();
+  player->playTune(showId);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
