@@ -80,7 +80,7 @@ void playShow(String showId) {
   Particle.publish("Playing show: " + showId);
 
   showPlaying = true;
-  lightshowController->playHitShow(&endShow);
+  lightshowController->playShow(showId, &endShow);
   player->playTune();
 }
 
@@ -97,6 +97,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   String topicStr(topic);
   if(topicStr.endsWith("playShow")) {
-    playShow("win");
+    const char* showId = root["showId"];
+    playShow(String(showId));
   }
 }

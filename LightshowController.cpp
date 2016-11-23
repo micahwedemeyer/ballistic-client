@@ -7,35 +7,34 @@ LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
   this->strip = strip;
 
   timer = new Timer(20, &LightshowController::advanceShow, *this);
-  showTimer = new Timer(1500, &LightshowController::endHitShow, *this);
+  showTimer = new Timer(1500, &LightshowController::endShow, *this);
   currentPos = 0;
   isWaiting = false;
-  hitShowPlaying = false;
+  showPlaying = false;
   idleShowPlaying = false;
 }
 
 void LightshowController::playIdleShow() {
-  hitShowPlaying = false;
+  showPlaying = false;
   idleShowPlaying = true;
   currentPos = 0;
   this->tick();
 }
 
-void LightshowController::playHitShow(std::function<void()> callback) {
-  if(hitShowPlaying) {
+void LightshowController::playShow(String showId, std::function<void()> callback) {
+  if(showPlaying) {
     return;
   }
 
-  hitShowCallback = callback;
-
-  uint32_t c = strip->Color(255,0,255);
-  setAll(c);
-  strip->show();
-
-  showTimer->reset();
-
-  hitShowPlaying = true;
+  showEndCallback = callback;
+  showPlaying = true;
   idleShowPlaying = false;
+
+  if(showId == "win") {
+    hitShow();
+  } else if(showId == "golive") {
+    goLiveShow();
+  }
 }
 
 void LightshowController::tick() {
@@ -55,11 +54,29 @@ void LightshowController::advanceShow() {
   currentPos = (currentPos + 1) % 255;
 }
 
-void LightshowController::endHitShow() {
+void LightshowController::endShow() {
   showTimer->stop();
-  Particle.publish("end hit show");
-  hitShowPlaying = false;
-  hitShowCallback();
+  Particle.publish("end show");
+  showPlaying = false;
+  showEndCallback();
+}
+
+void LightshowController::hitShow() {
+  uint32_t c = strip->Color(255, 0, 0);
+  setAll(c);
+  strip->show();
+
+  showTimer->changePeriod(1500);
+  showTimer->reset();
+}
+
+void LightshowController::goLiveShow() {
+  uint32_t c = strip->Color(0, 255, 0);
+  setAll(c);
+  strip->show();
+
+  showTimer->changePeriod(1500);
+  showTimer->reset();
 }
 
 void LightshowController::setLights() {
