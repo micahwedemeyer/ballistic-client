@@ -68,6 +68,7 @@ void hitDetected(int reading) {
 
 void endShow() {
   showPlaying = false;
+  Particle.publish("Ending show. Back to idle.");
   lightshowController->playIdleShow();
 }
 
@@ -75,6 +76,9 @@ void playShow(String showId) {
   if(showPlaying) {
     return;
   }
+
+  Particle.publish("Playing show: " + showId);
+
   showPlaying = true;
   lightshowController->playHitShow(&endShow);
   player->playTune();

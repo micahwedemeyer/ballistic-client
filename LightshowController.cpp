@@ -7,6 +7,7 @@ LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
   this->strip = strip;
 
   timer = new Timer(20, &LightshowController::advanceShow, *this);
+  showTimer = new Timer(1500, &LightshowController::endHitShow, *this);
   currentPos = 0;
   isWaiting = false;
   hitShowPlaying = false;
@@ -31,8 +32,7 @@ void LightshowController::playHitShow(std::function<void()> callback) {
   setAll(c);
   strip->show();
 
-  showTimer = new Timer(1500, &LightshowController::endHitShow, *this);
-  showTimer->start();
+  showTimer->reset();
 
   hitShowPlaying = true;
   idleShowPlaying = false;
@@ -57,7 +57,8 @@ void LightshowController::advanceShow() {
 
 void LightshowController::endHitShow() {
   showTimer->stop();
-  showTimer->dispose();
+  Particle.publish("end hit show");
+  hitShowPlaying = false;
   hitShowCallback();
 }
 

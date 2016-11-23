@@ -1,3 +1,4 @@
+#include "Particle.h";
 #include "ImpactSensor.h";
 
 ImpactSensor::ImpactSensor(int pin, int lpin, int thold, int hitDelayMs, std::function<void(int)> cb) {
