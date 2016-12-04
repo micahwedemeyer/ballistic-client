@@ -99,5 +99,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   if(topicStr.endsWith("playShow")) {
     const char* showId = root["showId"];
     playShow(String(showId));
+  } else if(topicStr.endsWith("requestIntroduction")) {
+    mqttClient->publishIntroduction();
   }
 }
