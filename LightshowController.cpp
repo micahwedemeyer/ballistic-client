@@ -30,9 +30,9 @@ void LightshowController::playShow(String showId, std::function<void()> callback
   showPlaying = true;
   idleShowPlaying = false;
 
-  if(showId == "win") {
+  if(showId.equals("win")) {
     hitShow();
-  } else if(showId == "golive") {
+  } else if(showId.equals("live")) {
     goLiveShow();
   }
 }
@@ -56,13 +56,12 @@ void LightshowController::advanceShow() {
 
 void LightshowController::endShow() {
   showTimer->stop();
-  Particle.publish("end show");
   showPlaying = false;
   showEndCallback();
 }
 
 void LightshowController::hitShow() {
-  uint32_t c = strip->Color(255, 0, 0);
+  uint32_t c = strip->Color(0, 255, 0);
   setAll(c);
   strip->show();
 
@@ -71,11 +70,11 @@ void LightshowController::hitShow() {
 }
 
 void LightshowController::goLiveShow() {
-  uint32_t c = strip->Color(0, 255, 0);
+  uint32_t c = strip->Color(255, 0, 0);
   setAll(c);
   strip->show();
 
-  showTimer->changePeriod(1500);
+  showTimer->changePeriod(5000);
   showTimer->reset();
 }
 
