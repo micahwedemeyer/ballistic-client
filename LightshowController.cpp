@@ -65,7 +65,7 @@ void LightshowController::hitShow() {
   setAll(c);
   strip->show();
 
-  showTimer->changePeriod(1500);
+  showTimer->changePeriod(2500);
   showTimer->reset();
 }
 
