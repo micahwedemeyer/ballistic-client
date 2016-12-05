@@ -10,7 +10,7 @@ MQTTClient::MQTTClient(MQTT *conn, String devID) {
 
 void MQTTClient::subscribeToTopics() {
   connection->subscribe(darterTopic("playShow"));
-  connection->subscribe("darter/all/*");
+  connection->subscribe("darter/all/#");
 }
 
 void MQTTClient::publishIntroduction() {

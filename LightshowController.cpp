@@ -61,7 +61,7 @@ void LightshowController::endShow() {
 }
 
 void LightshowController::hitShow() {
-  uint32_t c = strip->Color(0, 255, 0);
+  uint32_t c = strip->Color(255, 0, 255);
   setAll(c);
   strip->show();
 
