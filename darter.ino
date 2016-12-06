@@ -7,7 +7,6 @@
 #include "MQTT.h";
 #include "ArduinoJson.h";
 
-bool showPlaying;
 ImpactSensor *impactSensor;
 MusicPlayer *player;
 LightshowController *lightshowController;
@@ -16,6 +15,7 @@ MQTT *mqttConnection;
 MQTTClient *mqttClient;
 
 void endHit();
+void nullCallback() {}
 void mqttCallback(char* topic, byte* payload, unsigned int length);
 void hitDetected(int reading);
 
@@ -26,8 +26,6 @@ void setup() {
 
   impactSensor = new ImpactSensor(IMPACT_PIN, LED_PIN, IMPACT_THRESHOLD, HIT_DELAY_MS, &hitDetected);
 
-  showPlaying = false;
-
   player = new MusicPlayer();
 
   strip = new Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEOPIXEL_TYPE);
@@ -35,7 +33,7 @@ void setup() {
   strip->setBrightness(NEOPIXEL_BRIGHTNESS);
 
   lightshowController = new LightshowController(strip);
-  lightshowController->playIdleShow();
+  lightshowController->playShow("idle", true, &nullCallback);
 
   digitalWrite(LED_PIN, LOW);
 
@@ -67,20 +65,18 @@ void hitDetected(int reading) {
 }
 
 void endShow() {
-  showPlaying = false;
   Particle.publish("Ending show. Back to idle.");
-  lightshowController->playIdleShow();
+  lightshowController->playShow("idle", true, &nullCallback);
 }
 
 void playShow(String showId) {
-  if(showPlaying) {
-    return;
-  }
-
   Particle.publish("Playing show: " + showId);
 
-  showPlaying = true;
-  lightshowController->playShow(showId, &endShow);
+  if(showId.equals("win")) {
+    lightshowController->playShow(showId, false, &endShow);
+  } else if(showId.equals("live")) {
+    lightshowController->playShow(showId, true, &endShow);
+  }
   //player->playTune(showId);
 }
 

@@ -7,81 +7,98 @@ LightshowController::LightshowController(Adafruit_NeoPixel *strip) {
   this->strip = strip;
 
   timer = new Timer(20, &LightshowController::advanceShow, *this);
-  showTimer = new Timer(1500, &LightshowController::endShow, *this);
-  currentPos = 0;
   isWaiting = false;
   showPlaying = false;
-  idleShowPlaying = false;
+
+  currentShow = "";
+  loopShow = false;
+  showSteps = 0;
+  currentStep = 0;
 }
 
-void LightshowController::playIdleShow() {
-  showPlaying = false;
-  idleShowPlaying = true;
-  currentPos = 0;
-  this->tick();
-}
-
-void LightshowController::playShow(String showId, std::function<void()> callback) {
-  if(showPlaying) {
-    return;
-  }
-
+void LightshowController::playShow(String showId, bool loop, std::function<void()> callback) {
   showEndCallback = callback;
-  showPlaying = true;
-  idleShowPlaying = false;
+  loopShow = loop;
+  currentShow = showId;
+  currentStep = 0;
 
-  if(showId.equals("win")) {
-    hitShow();
-  } else if(showId.equals("live")) {
-    goLiveShow();
-  }
+  showPlaying = true;
 }
 
 void LightshowController::tick() {
-  if(!idleShowPlaying || isWaiting) {
+  if(isWaiting) {
     return;
   }
 
+  if(currentShow.equals("idle")) {
+    idleShow();
+  } else if(currentShow.equals("live")) {
+    liveShow();
+  } else if(currentShow.equals("win")) {
+    winShow();
+  }
+}
+
+void LightshowController::idleShow() {
+  showSteps = 255;
+
   this->setLights();
   strip->show();
+  timer->changePeriod(20);
   timer->reset();
+
+  isWaiting = true;
+}
+
+void LightshowController::liveShow() {
+  showSteps = 1;
+
+  uint32_t c = strip->Color(255, 0, 0);
+  setAll(c);
+  strip->show();
+
+  timer->changePeriod(3);
+  timer->reset();
+
+  isWaiting = true;
+}
+
+void LightshowController::winShow() {
+  showSteps = 100;
+
+  uint32_t c = strip->Color(255, 0, 255);
+  setAll(c);
+  strip->show();
+
+  timer->changePeriod(10);
+  timer->reset();
+
   isWaiting = true;
 }
 
 void LightshowController::advanceShow() {
   timer->stop();
   isWaiting = false;
-  currentPos = (currentPos + 1) % 255;
+  currentStep += 1;
+
+  if(currentStep > showSteps) {
+    currentStep = 0;
+    if(!loopShow) {
+      endShow();
+    }
+  }
 }
 
 void LightshowController::endShow() {
-  showTimer->stop();
+  currentShow = "";
   showPlaying = false;
   showEndCallback();
-}
-
-void LightshowController::hitShow() {
-  uint32_t c = strip->Color(255, 0, 255);
-  setAll(c);
-  strip->show();
-
-  showTimer->changePeriod(2500);
-  showTimer->reset();
-}
-
-void LightshowController::goLiveShow() {
-  uint32_t c = strip->Color(255, 0, 0);
-  setAll(c);
-  strip->show();
-
-  showTimer->changePeriod(5000);
-  showTimer->reset();
 }
 
 void LightshowController::setLights() {
   int i;
   for(i = 0; i < strip->numPixels(); i++) {
-    strip->setPixelColor(i, this->wheel((i+currentPos) & 255));
+    strip->setPixelColor(i, this->wheel((i+currentStep) & 255));
   }
 }
 

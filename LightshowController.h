@@ -3,26 +3,30 @@
 class LightshowController {
 public:
   LightshowController(Adafruit_NeoPixel *strip);
-  void playShow(String showId, std::function<void()> callback);
-  void playIdleShow();
+  void playShow(String showId, bool loop, std::function<void()> callback);
+
   void tick();
   void blank();
   void setLights();
   void setAll(uint32_t color);
-  void advanceShow();
 
 private:
   uint32_t wheel(byte wheelPos);
+  void idleShow();
+  void liveShow();
+  void winShow();
   void endShow();
-  void hitShow();
-  void goLiveShow();
+  void advanceShow();
 
   bool showPlaying;
-  bool idleShowPlaying;
   bool isWaiting;
-  int currentPos;
+
+  String currentShow;
+  bool loopShow;
+  int showSteps;
+  int currentStep;
+
   Timer *timer;
-  Timer *showTimer;
   std::function<void()> showEndCallback;
   Adafruit_NeoPixel *strip;
 };
