@@ -1,4 +1,5 @@
 #include "Particle.h";
+#include "pitches.h";
 #include "definitions.h";
 #include "MusicPlayer.h";
 
@@ -19,13 +20,13 @@ void MusicPlayer::playTune(String tuneId) {
 
   if(tuneId == "win") {
     melodyIndex = 0;
+  } else if(tuneId == "live") {
+    melodyIndex = 1;
   }
 
-  if(!tuneInProgress) {
-    tuneInProgress = true;
-    noteIndex = -1;
-    this->tick();
-  }
+  noteIndex = 0;
+  tuneInProgress = true;
+  noteInProgress = false;
 }
 
 void MusicPlayer::tick() {
@@ -33,35 +34,37 @@ void MusicPlayer::tick() {
     return;
   }
 
+  int note = notes[melodyIndex][noteIndex];
+  int duration = 1000 / noteDurations[melodyIndex][noteIndex];
+  this->playNote(note, duration);
+}
+
+void MusicPlayer::playNote(int note, int duration) {
+  noteInProgress = true;
+  Log.trace("Start Note");
+
+  // Note!! This is non-blocking! The tone is automatically stopped by an interrupt.
+  tone(SPEAKER_PIN, note, duration);
+
+  // Include a pause of the length of the note
+  int durationWithRest = duration * 2;
+
+  timer->changePeriod(durationWithRest);
+  timer->reset();
+}
+
+void MusicPlayer::endNote() {
+  timer->stop();
+  Log.trace("End Note");
+  noteInProgress = false;
+
   noteIndex++;
-  if(noteIndex < noteCounts[melodyIndex]) {
-    int note = notes[melodyIndex][noteIndex];
-    int duration = noteDurations[melodyIndex][noteIndex];
-    this->playNote(note, duration);
-  } else {
+  if(noteIndex >= noteCounts[melodyIndex]) {
     this->endPlay();
   }
 }
 
-void MusicPlayer::endNote() {
-  noteInProgress = false;
-}
-
-void MusicPlayer::playNote(int note, int duration) {
-  tone(SPEAKER_PIN, note, duration);
-  noteInProgress = true;
-
-  // to distinguish the notes, set a minimum time between them.
-  // the note's duration + 30% seems to work well:
-  int pauseBetweenNotes = duration * 1.30;
-
-  timer->changePeriod(pauseBetweenNotes);
-  timer->reset();
-}
-
 void MusicPlayer::endPlay() {
-  timer->stop();
-  noTone(SPEAKER_PIN);
   noteInProgress = false;
   tuneInProgress = false;
 }

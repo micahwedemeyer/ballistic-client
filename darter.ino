@@ -13,6 +13,7 @@ LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 MQTT *mqttConnection;
 MQTTClient *mqttClient;
+SerialLogHandler logHandler(LOG_LEVEL_TRACE);
 
 void endHit();
 void nullCallback() {}
@@ -44,6 +45,7 @@ void setup() {
   mqttClient->subscribeToTopics();
   mqttClient->publishIntroduction();
 
+  Log.info("Setup Complete");
   Particle.publish("Setup Complete");
 }
 
@@ -70,6 +72,7 @@ void endShow() {
 }
 
 void playShow(String showId) {
+  Log.info("Playing show: " + showId);
   Particle.publish("Playing show: " + showId);
 
   if(showId.equals("win")) {
@@ -77,7 +80,7 @@ void playShow(String showId) {
   } else if(showId.equals("live")) {
     lightshowController->playShow(showId, true, &endShow);
   }
-  //player->playTune(showId);
+  player->playTune(showId);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
@@ -89,6 +92,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(p);
 
+  Log.trace("MQTT message received: " + String(topic));
   Particle.publish("MQTT message received: " + String(topic));
 
   String topicStr(topic);

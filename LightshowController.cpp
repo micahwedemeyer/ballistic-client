@@ -57,20 +57,23 @@ void LightshowController::liveShow() {
   setAll(c);
   strip->show();
 
-  timer->changePeriod(3);
+  // WARNING!!! These software timers really seem to interfere with the
+  // tone library. If we change the period or the timer ends/interrupts
+  // while tone is playing, it will cause stuttering and/or tone stops.
+  timer->changePeriod(2000);
   timer->reset();
 
   isWaiting = true;
 }
 
 void LightshowController::winShow() {
-  showSteps = 100;
+  showSteps = 1;
 
   uint32_t c = strip->Color(255, 0, 255);
   setAll(c);
   strip->show();
 
-  timer->changePeriod(10);
+  timer->changePeriod(2000);
   timer->reset();
 
   isWaiting = true;
