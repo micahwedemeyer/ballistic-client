@@ -2,10 +2,33 @@
 #include "MQTT.h";
 #include "MQTTClient.h";
 #include "ArduinoJson.h";
+#include "psyslog.h";
 
 MQTTClient::MQTTClient(MQTT *conn, String devID) {
   connection = conn;
   deviceID = devID;
+}
+
+void MQTTClient::tick() {
+  if(connection->isConnected()) {
+    connection->loop();
+  } else {
+    LOGI("No MQTT connection. (Re)connecting.");
+    reconnect();
+  }
+}
+
+void MQTTClient::connect() {
+  LOGI("Connecting to MQTT broker");
+  connection->connect("darter-" + System.deviceID());
+  delay(50);
+
+  subscribeToTopics();
+  publishIntroduction();
+}
+
+void MQTTClient::reconnect() {
+  connect();
 }
 
 void MQTTClient::subscribeToTopics() {
@@ -41,12 +64,6 @@ void MQTTClient::publishHit() {
     root.printTo(jsonString, 255);
 
     connection->publish(darterTopic("hits"), jsonString);
-  }
-}
-
-void MQTTClient::tick() {
-  if(connection->isConnected()) {
-    connection->loop();
   }
 }
 

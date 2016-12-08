@@ -23,3 +23,9 @@
 // Various Constants
 #define IMPACT_THRESHOLD 700
 #define HIT_DELAY_MS 300
+
+// Logging Settings
+#define SYSLOG_DEBUG
+#define SYSLOG_USE_DEVICEID
+#define SYSLOG_HOST "logs5.papertrailapp.com"
+#define SYSLOG_PORT 29325

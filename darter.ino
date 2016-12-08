@@ -6,6 +6,7 @@
 #include "MQTTClient.h";
 #include "MQTT.h";
 #include "ArduinoJson.h";
+#include "psyslog.h";
 
 ImpactSensor *impactSensor;
 MusicPlayer *player;
@@ -13,7 +14,6 @@ LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 MQTT *mqttConnection;
 MQTTClient *mqttClient;
-SerialLogHandler logHandler(LOG_LEVEL_TRACE);
 
 void endHit();
 void nullCallback() {}
@@ -24,6 +24,8 @@ void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
   pinMode(IMPACT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
+
+  syslog_initialize(SYSLOG_HOST, SYSLOG_PORT);
 
   impactSensor = new ImpactSensor(IMPACT_PIN, LED_PIN, IMPACT_THRESHOLD, HIT_DELAY_MS, &hitDetected);
 
@@ -40,13 +42,11 @@ void setup() {
 
   byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
   mqttConnection = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
-  mqttConnection->connect("darter-" + System.deviceID());
   mqttClient = new MQTTClient(mqttConnection, System.deviceID());
-  mqttClient->subscribeToTopics();
-  mqttClient->publishIntroduction();
+  mqttClient->connect();
 
-  Log.info("Setup Complete");
   Particle.publish("Setup Complete");
+  LOGI("Setup Complete");
 }
 
 void ticks() {
@@ -62,6 +62,7 @@ void loop() {
 
 // Callback for the ImpactSensor
 void hitDetected(int reading) {
+  LOGI("Hit: " + String(reading));
   Particle.publish("Hit: " + String(reading));
   mqttClient->publishHit();
 }
@@ -72,7 +73,7 @@ void endShow() {
 }
 
 void playShow(String showId) {
-  Log.info("Playing show: " + showId);
+  LOGI("Playing show: " + showId);
   Particle.publish("Playing show: " + showId);
 
   if(showId.equals("win")) {
@@ -92,7 +93,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(p);
 
-  Log.trace("MQTT message received: " + String(topic));
+  LOGD("MQTT message received: " + String(topic));
   Particle.publish("MQTT message received: " + String(topic));
 
   String topicStr(topic);

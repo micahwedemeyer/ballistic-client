@@ -7,6 +7,8 @@ public:
   void subscribeToTopics();
   void publishIntroduction();
   void publishHit();
+  void connect();
+  void reconnect();
   void tick();
 
 private:
