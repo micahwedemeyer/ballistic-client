@@ -1,15 +1,7 @@
-# RPC Commands
+# Ballistic (Client)
 
-#### Go Live
+This is the (Arduino/C++) client component to the Ballistic Dart Target System.
 
- * Color
+# Hardware Design / Pinout (TODO)
 
-#### Play Show
-
- * Show ID
-
- {"command":"playShow", "showId":1}
-
-#### Go Idle
-
- * ???
+# MQTT Protocol / Commands (TODO)
