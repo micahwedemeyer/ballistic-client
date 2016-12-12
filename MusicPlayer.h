@@ -14,17 +14,19 @@ private:
   int noteIndex;
   int melodyIndex;
 
-  int noteCounts[2] = {5,3};
-  int notes[2][9] = {
+  int noteCounts[3] = {5,3,3};
+  int notes[3][9] = {
     {NOTE_AS6, NOTE_DS7, NOTE_DS7, NOTE_CS7, NOTE_DS7}, // Hit
-    {NOTE_D5, NOTE_D5, NOTE_D7} // Go Live
+    {NOTE_D5, NOTE_D5, NOTE_D7}, // Go Live
+    {NOTE_C5, NOTE_C4, NOTE_C3} // You lose
     // {0,0,0,0,0,0,0,0,0}, // Hit
     // {0,0,0,0,0  } // Go Live
 
   };
-  int noteDurations[2][9] = {
+  int noteDurations[3][9] = {
     {4,8,8,4,4},
-    {8,8,2}
+    {8,8,2},
+    {4,4,4}
   };
 
   void playNote(int note, int duration);

@@ -15,6 +15,7 @@ private:
   void idleShow();
   void liveShow();
   void winShow();
+  void loseShow();
   void endShow();
   void advanceShow();
 

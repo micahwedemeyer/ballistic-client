@@ -76,7 +76,7 @@ void playShow(String showId) {
   LOGI("Playing show: " + showId);
   Particle.publish("Playing show: " + showId);
 
-  if(showId.equals("win")) {
+  if(showId.equals("win") || showId.equals("lose")) {
     lightshowController->playShow(showId, false, &endShow);
   } else if(showId.equals("live")) {
     lightshowController->playShow(showId, true, &endShow);

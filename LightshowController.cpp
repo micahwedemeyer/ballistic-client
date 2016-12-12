@@ -36,6 +36,8 @@ void LightshowController::tick() {
     liveShow();
   } else if(currentShow.equals("win")) {
     winShow();
+  } else if(currentShow.equals("lose")) {
+    loseShow();
   }
 }
 
@@ -72,6 +74,17 @@ void LightshowController::winShow() {
   uint32_t c = strip->Color(255, 0, 255);
   setAll(c);
   strip->show();
+
+  timer->changePeriod(2000);
+  timer->reset();
+
+  isWaiting = true;
+}
+
+void LightshowController::loseShow() {
+  showSteps = 1;
+
+  blank();
 
   timer->changePeriod(2000);
   timer->reset();

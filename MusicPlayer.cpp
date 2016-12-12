@@ -22,6 +22,8 @@ void MusicPlayer::playTune(String tuneId) {
     melodyIndex = 0;
   } else if(tuneId == "live") {
     melodyIndex = 1;
+  } else if(tuneId == "lose") {
+    melodyIndex = 2;
   }
 
   noteIndex = 0;
