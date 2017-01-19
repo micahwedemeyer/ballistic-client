@@ -57,6 +57,7 @@ void LightshowController::liveShow() {
 
   uint32_t c = strip->Color(255, 0, 0);
   setAll(c);
+  strip->setBrightness(255);
   strip->show();
 
   // WARNING!!! These software timers really seem to interfere with the
@@ -108,6 +109,7 @@ void LightshowController::advanceShow() {
 void LightshowController::endShow() {
   currentShow = "";
   showPlaying = false;
+  strip->setBrightness(128);
   showEndCallback();
 }
 
