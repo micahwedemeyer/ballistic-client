@@ -6,7 +6,7 @@
 #include "MQTTClient.h";
 #include "MQTT.h";
 #include "ArduinoJson.h";
-#include "psyslog.h";
+#include "papertrail.h";
 
 ImpactSensor *impactSensor;
 MusicPlayer *player;
@@ -25,7 +25,7 @@ void setup() {
   pinMode(IMPACT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
 
-  syslog_initialize(SYSLOG_HOST, SYSLOG_PORT);
+  PapertrailLogHandler papertailHandler(SYSLOG_HOST, SYSLOG_PORT, "ballistic-client-" + System.deviceID(), LOG_LEVEL_TRACE);
 
   impactSensor = new ImpactSensor(IMPACT_PIN, LED_PIN, IMPACT_THRESHOLD, HIT_DELAY_MS, &hitDetected);
 
@@ -45,8 +45,7 @@ void setup() {
   mqttClient = new MQTTClient(mqttConnection, System.deviceID());
   mqttClient->connect();
 
-  Particle.publish("Setup Complete");
-  LOGI("Setup Complete");
+  Log.info("Setup Complete");
 }
 
 void ticks() {
@@ -62,19 +61,17 @@ void loop() {
 
 // Callback for the ImpactSensor
 void hitDetected(int reading) {
-  LOGI("Hit: " + String(reading));
-  Particle.publish("Hit: " + String(reading));
+  Log.info("Hit: " + String(reading));
   mqttClient->publishHit();
 }
 
 void endShow() {
-  Particle.publish("Ending show. Back to idle.");
+  Log.trace("Ending show. Back to idle.");
   lightshowController->playShow("idle", true, &nullCallback);
 }
 
 void playShow(String showId) {
-  LOGI("Playing show: " + showId);
-  Particle.publish("Playing show: " + showId);
+  Log.info("Playing show: " + showId);
 
   if(showId.equals("win") || showId.equals("lose")) {
     lightshowController->playShow(showId, false, &endShow);
@@ -93,8 +90,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(p);
 
-  LOGD("MQTT message received: " + String(topic));
-  Particle.publish("MQTT message received: " + String(topic));
+  Log.trace("MQTT message received: " + String(topic));
 
   String topicStr(topic);
   if(topicStr.endsWith("playShow")) {

@@ -34,7 +34,7 @@ bool ImpactSensor::isHit(int impactReading) {
 }
 
 void ImpactSensor::processHit(int sensorReading) {
-  Particle.publish("Processing Hit");
+  Log.trace("Processing Hit");
   hitProcessing = true;
   hitDelayer->reset();
   digitalWrite(ledPin, HIGH);
