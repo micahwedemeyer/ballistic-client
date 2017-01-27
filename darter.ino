@@ -40,6 +40,8 @@ void setup() {
 
   digitalWrite(LED_PIN, LOW);
 
+  Log.info("Initial MQTT setup");
+
   byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
   mqttConnection = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
   mqttClient = new MQTTClient(mqttConnection, System.deviceID());
@@ -61,7 +63,7 @@ void loop() {
 
 // Callback for the ImpactSensor
 void hitDetected(int reading) {
-  Log.info("Hit: " + String(reading));
+  Log.info("Hit: %d", reading);
   mqttClient->publishHit();
 }
 
@@ -71,7 +73,7 @@ void endShow() {
 }
 
 void playShow(String showId) {
-  Log.info("Playing show: " + showId);
+  Log.info("Playing show: %s", showId.c_str());
 
   if(showId.equals("win") || showId.equals("lose")) {
     lightshowController->playShow(showId, false, &endShow);
@@ -90,7 +92,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(p);
 
-  Log.trace("MQTT message received: " + String(topic));
+  Log.trace("MQTT message received: %s", topic);
 
   String topicStr(topic);
   if(topicStr.endsWith("playShow")) {
