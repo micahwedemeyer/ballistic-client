@@ -20,8 +20,18 @@ void MQTTClient::tick() {
 void MQTTClient::connect() {
   Log.info("Connecting to MQTT broker");
 
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+
+  char deviceId[32];
+  System.deviceID().toCharArray(deviceId, 32);
+  root["deviceId"] = deviceId;
+
+  char jsonString[255];
+  root.printTo(jsonString, 255);
+
   // Connect to the MQTT broker and register a LWT to fire if connectivity is lost
-  connection->connect("darter-" + System.deviceID(), darterTopic("lwt"), MQTT::QOS0, 0, "dead");
+  connection->connect("darter-" + System.deviceID(), darterTopic("lwt"), MQTT::QOS0, 0, jsonString);
   delay(50);
 
   if(connection->isConnected()) {
@@ -35,6 +45,10 @@ void MQTTClient::connect() {
 
 void MQTTClient::reconnect() {
   connect();
+}
+
+bool MQTTClient::isConnected() {
+  return connection->isConnected();
 }
 
 void MQTTClient::subscribeToTopics() {
