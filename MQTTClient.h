@@ -10,7 +10,6 @@ public:
   void connect();
   void reconnect();
   void tick();
-  bool isConnected();
 
 private:
   MQTT *connection;

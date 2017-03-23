@@ -14,8 +14,6 @@ LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 MQTT *mqttConnection;
 MQTTClient *mqttClient;
-LEDStatus *mqttConnectionStatus;
-IPAddress *mqttAddress;
 
 void endHit();
 void nullCallback() {}
@@ -49,9 +47,6 @@ void setup() {
   mqttClient = new MQTTClient(mqttConnection, System.deviceID());
   mqttClient->connect();
 
-  mqttAddress = new IPAddress(serverIP);
-  mqttConnectionStatus = new LEDStatus(RGB_COLOR_WHITE, LED_PATTERN_BLINK, LED_SPEED_FAST);
-
   Log.info("Setup Complete");
 }
 
@@ -64,7 +59,6 @@ void ticks() {
 
 void loop() {
   ticks();
-  connectivityCheck();
 }
 
 // Callback for the ImpactSensor
@@ -107,20 +101,4 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   } else if(topicStr.endsWith("requestIntroduction")) {
     mqttClient->publishIntroduction();
   }
-}
-
-void connectivityCheck() {
-  // Uh oh, we are no longer connected to MQTT and we can't ping the MQTT IP
-  if(!mqttClient->isConnected() && !canPing()) {
-    Log.info("Cannot ping the MQTT server...but then this log message will also be lost. C'est la vie...");
-    if(!mqttConnectionStatus->isActive()) {
-      mqttConnectionStatus->setActive();
-    }
-  } else {
-    mqttConnectionStatus->setActive(false);
-  }
-}
-
-bool canPing() {
-  return WiFi.ping(*mqttAddress, 2) > 0;
 }
