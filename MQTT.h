@@ -10,7 +10,7 @@ without limitation the rights to use, copy, modify, merge, publish,
 distribute, sublicense, and/or sell copies of the Software, and to
 permit persons to whom the Software is furnished to do so, subject to
 the following conditions:
-   
+
 The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
 
@@ -34,10 +34,10 @@ sample code bearing this copyright.
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -48,23 +48,18 @@ sample code bearing this copyright.
 //---------------------------------------------------------------------------
 */
 
-#ifndef MQTT_h
-#define MQTT_h
+#pragma once
 
-#if defined(SPARK) || (PLATFORM_ID==88)
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
-#elif defined(ARDUINO)
-#include "Client.h"
-#endif
 
 // MQTT_MAX_PACKET_SIZE : Maximum packet size
 // this size is total of [MQTT Header(Max:5byte) + Topic Name Length + Topic Name + Message ID(QoS1|2) + Payload]
 #define MQTT_MAX_PACKET_SIZE 255
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
-#define MQTT_KEEPALIVE 15
+#define MQTT_DEFAULT_KEEPALIVE 15
 
 #define MQTTPROTOCOLVERSION 3
 #define MQTTCONNECT     1 << 4  // Client request to connect to Server
@@ -83,21 +78,36 @@ sample code bearing this copyright.
 #define MQTTDISCONNECT  14 << 4 // Client is Disconnecting
 #define MQTTReserved    15 << 4 // Reserved
 
+
+// for debugging.
+#define DEBUG_MQTT_SERIAL_OUTPUT       1
+#if defined(DEBUG_MQTT_SERIAL_OUTPUT)
+#define debug_print(fmt, ...)  Serial.printf("[DEBUG] MQTT " fmt, ##__VA_ARGS__)
+#else /* !DEBUG_MQTT_SERIAL_OUTPUT */
+  #define debug_print(fmt, ...) ((void)0)
+#endif /* DEBUG_MQTT_SERIAL_OUTPUT */
+
+
 class MQTT {
 /** types */
 public:
-typedef enum{
+typedef enum {
     QOS0 = 0,
     QOS1 = 1,
     QOS2 = 2,
-}EMQTT_QOS;
+} EMQTT_QOS;
+
+typedef enum {
+    CONN_ACCEPT = 0,
+    CONN_UNACCEPTABLE_PROCOTOL = 1,
+    CONN_ID_REJECT = 2,
+    CONN_SERVER_UNAVAILALE = 3,
+    CONN_BAD_USER_PASSWORD = 4,
+    CONN_NOT_AUTHORIZED = 5
+} EMQTT_CONNACK_RESPONSE;
 
 private:
-#if defined(SPARK) || (PLATFORM_ID==88)
     TCPClient *_client;
-#elif defined(ARDUINO)
-    Client *_client;
-#endif
     uint8_t *buffer;
     uint16_t nextMsgId;
     unsigned long lastOutActivity;
@@ -112,70 +122,56 @@ private:
     String domain;
     uint8_t *ip;
     uint16_t port;
+    int keepalive;
     uint16_t maxpacketsize;
-    
-    void initialize(char* domain, uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize
-#if defined(SPARK) || (PLATFORM_ID==88)
-#elif defined(ARDUINO)
-        , Client& client
-#endif
-    );
+
+    void initialize(char* domain, uint8_t *ip, uint16_t port, int keepalive, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize);
 
 public:
     MQTT();
-    
-    MQTT(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int)
-#if defined(SPARK) || (PLATFORM_ID==88)
-#elif defined(ARDUINO)
-        , Client& client
-#endif
-        );
-        
-    MQTT(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize
-#if defined(SPARK) || (PLATFORM_ID==88)
-#elif defined(ARDUINO)
-        , Client& client
-#endif
-        );
-        
-    MQTT(uint8_t *, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int)
-#if defined(SPARK) || (PLATFORM_ID==88)
-#elif defined(ARDUINO)
-        , Client& client
-#endif
-        );
-    MQTT(uint8_t *, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize
-#if defined(SPARK) || (PLATFORM_ID==88)
-#elif defined(ARDUINO)
-        , Client& client
-#endif
-        );
+
+    MQTT(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int));
+
+    MQTT(char* domain, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize);
+
+    MQTT(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int));
+
+    MQTT(uint8_t *ip, uint16_t port, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize);
+
+    MQTT(char* domain, uint16_t port, int keepalive, void (*callback)(char*,uint8_t*,unsigned int));
+
+    MQTT(char* domain, uint16_t port, int keepalive, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize);
+
+    MQTT(uint8_t *ip, uint16_t port, int keepalive, void (*callback)(char*,uint8_t*,unsigned int));
+
+    MQTT(uint8_t *ip, uint16_t port, int keepalive, void (*callback)(char*,uint8_t*,unsigned int), int maxpacketsize);
 
     ~MQTT();
 
-    bool connect(const char *);
-    bool connect(const char *, const char *, const char *);
-    bool connect(const char *, const char *, EMQTT_QOS, uint8_t, const char *);
-    bool connect(const char *, const char *, const char *, const char *, EMQTT_QOS, uint8_t, const char*);
+    void setBroker(char* domain, uint16_t port);
+    void setBroker(uint8_t *ip, uint16_t port);
+
+    bool connect(const char *id);
+    bool connect(const char *id, const char *user, const char *pass);
+    bool connect(const char *id, const char *user, EMQTT_QOS, uint8_t, const char *pass);
+    bool connect(const char *id, const char *user, const char *pass, const char* willTopic, EMQTT_QOS willQos, uint8_t willRetain, const char* willMessage);
     void disconnect();
-    
-    bool publish(const char *, const char *);
-    bool publish(const char *, const char *, EMQTT_QOS, uint16_t *messageid = NULL);
-    bool publish(const char *, const char *, EMQTT_QOS, bool, uint16_t *messageid = NULL);
-    bool publish(const char *, const uint8_t *, unsigned int);
-    bool publish(const char *, const uint8_t *, unsigned int, EMQTT_QOS, uint16_t *messageid = NULL);
-    bool publish(const char *, const uint8_t *, unsigned int, EMQTT_QOS, bool, uint16_t *messageid = NULL);
-    bool publish(const char *, const uint8_t *, unsigned int, bool);
-    bool publish(const char *, const uint8_t *, unsigned int, bool, EMQTT_QOS, uint16_t *messageid = NULL);
-    bool publish(const char *, const uint8_t *, unsigned int, bool, EMQTT_QOS, bool, uint16_t *messageid);
+
+    bool publish(const char *topic, const char* payload);
+    bool publish(const char *topic, const char* payload, EMQTT_QOS qos, uint16_t *messageid = NULL);
+    bool publish(const char *topic, const char* payload, EMQTT_QOS qos, bool dup, uint16_t *messageid = NULL);
+    bool publish(const char *topic, const uint8_t *pyaload, unsigned int plength);
+    bool publish(const char *topic, const uint8_t *payload, unsigned int plength, EMQTT_QOS qos, uint16_t *messageid = NULL);
+    bool publish(const char *topic, const uint8_t *payload, unsigned int plength, EMQTT_QOS qos, bool dup, uint16_t *messageid = NULL);
+    bool publish(const char *topic, const uint8_t *payload, unsigned int plength, bool retain);
+    bool publish(const char *topic, const uint8_t *payload, unsigned int plength, bool retain, EMQTT_QOS qos, uint16_t *messageid = NULL);
+    bool publish(const char *topic, const uint8_t *payload, unsigned int plength, bool retain, EMQTT_QOS qos, bool dup, uint16_t *messageid);
     void addQosCallback(void (*qoscallback)(unsigned int));
     bool publishRelease(uint16_t messageid);
 
-    bool subscribe(const char *);
-    bool subscribe(const char *, EMQTT_QOS);
-    bool unsubscribe(const char *);
+    bool subscribe(const char *topic);
+    bool subscribe(const char *topic, EMQTT_QOS);
+    bool unsubscribe(const char *topic);
     bool loop();
     bool isConnected();
 };
-
-#endif
