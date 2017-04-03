@@ -48,6 +48,7 @@ void setup() {
   mqttClient->connect();
 
   Log.info("Setup Complete");
+  Particle.publish("Setup Complete");
 }
 
 void ticks() {

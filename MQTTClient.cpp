@@ -34,6 +34,8 @@ void MQTTClient::connect() {
 }
 
 void MQTTClient::reconnect() {
+  // Wait 15 seconds for dead sockets to timeout and so forth
+  delay(15000);
   connect();
 }
 
