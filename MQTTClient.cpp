@@ -20,8 +20,7 @@ void MQTTClient::tick() {
 void MQTTClient::connect() {
   Log.info("Connecting to MQTT broker");
 
-  // Connect to the MQTT broker and register a LWT to fire if connectivity is lost
-  connection->connect("darter-" + System.deviceID(), darterTopic("lwt"), MQTT::QOS0, 0, "dead");
+  connection->connect("darter-" + System.deviceID());
   delay(50);
 
   if(connection->isConnected()) {
@@ -35,7 +34,7 @@ void MQTTClient::connect() {
 
 void MQTTClient::reconnect() {
   // Wait 15 seconds for dead sockets to timeout and so forth
-  delay(15000);
+  delay(5000);
   connect();
 }
 

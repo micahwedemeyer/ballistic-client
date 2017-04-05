@@ -14,9 +14,10 @@ LightshowController *lightshowController;
 Adafruit_NeoPixel *strip;
 MQTT *mqttConnection;
 MQTTClient *mqttClient;
+byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
 
-//PapertrailLogHandler papertailHandler(SYSLOG_HOST, SYSLOG_PORT, "ballistic", "ballistic-client-" + System.deviceID(), LOG_LEVEL_DEBUG);
-SerialLogHandler serialLogger(LOG_LEVEL_DEBUG);
+//PapertrailLogHandler papertailHandler(SYSLOG_HOST, SYSLOG_PORT, "ballistic", "ballistic-client-" + System.deviceID(), LOG_LEVEL_INFO);
+SerialLogHandler serialLogger(LOG_LEVEL_INFO);
 
 void endHit();
 void nullCallback() {}
@@ -43,7 +44,6 @@ void setup() {
 
   Log.info("Initial MQTT setup");
 
-  byte serverIP[] = {MQTT_BROKER_HOST_B1, MQTT_BROKER_HOST_B2, MQTT_BROKER_HOST_B3, MQTT_BROKER_HOST_B4};
   mqttConnection = new MQTT(serverIP, MQTT_BROKER_PORT, mqttCallback);
   mqttClient = new MQTTClient(mqttConnection, System.deviceID());
   mqttClient->connect();
