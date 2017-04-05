@@ -15,6 +15,9 @@ Adafruit_NeoPixel *strip;
 MQTT *mqttConnection;
 MQTTClient *mqttClient;
 
+//PapertrailLogHandler papertailHandler(SYSLOG_HOST, SYSLOG_PORT, "ballistic", "ballistic-client-" + System.deviceID(), LOG_LEVEL_DEBUG);
+SerialLogHandler serialLogger(LOG_LEVEL_DEBUG);
+
 void endHit();
 void nullCallback() {}
 void mqttCallback(char* topic, byte* payload, unsigned int length);
@@ -24,8 +27,6 @@ void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
   pinMode(IMPACT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
-
-  PapertrailLogHandler papertailHandler(SYSLOG_HOST, SYSLOG_PORT, "ballistic", "ballistic-client-" + System.deviceID(), LOG_LEVEL_TRACE);
 
   impactSensor = new ImpactSensor(IMPACT_PIN, LED_PIN, IMPACT_THRESHOLD, HIT_DELAY_MS, &hitDetected);
 
